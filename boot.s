@@ -1,6 +1,7 @@
 .code16
 .section .text
-.org 0x7c00
+#.org 0x7c00
+.globl _start
 _start:
     movw %cs, %ax
     movw %ax, %ds
