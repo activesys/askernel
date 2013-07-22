@@ -1,25 +1,48 @@
 .code16
 .section .text
-#.org 0x7c00
+.equ BOOT_SEG, 0x7c00
+.equ EXEC_SEG, 0x600
+
 .globl _start
 _start:
-    movw %cs, %ax
+    cli
+    xor %ax, %ax
     movw %ax, %ds
     movw %ax, %es
+    sti
 
+    #
+    # read sector.
+    #
+    movb $0x02, %ah
+    movb $0x01, %al
+    movb $0x00, %ch
+    movb $0x02, %cl
+    movb $0x00, %dh
+    movb $0x00, %dl
+    movw $EXEC_SEG, %bx
+    int $0x13
+    jc no_test
+    ljmp $0x00, $EXEC_SEG
+
+no_test:
+    #
+    # show message.
+    #
     movw $boot_message, %ax
     movw %ax, %bp
     movw $0x1301, %ax
-    movw $16, %cx
+    movw $len, %cx
     movw $0x0c, %bx
     movw $0x00, %dx
-
     int $0x10
 
     jmp .
 
 boot_message:
-    .ascii "Hello, OS world!"
+    .ascii "No test to be execute!"
+boot_message_end:
+    .equ len, boot_message_end - boot_message
 
 dummy:
     .space 510-(.-_start), 0
