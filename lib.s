@@ -1,33 +1,71 @@
 .code16
 .section .text
 .globl _start
-.globl _echo
 #
 # start
 #
 _start:
-    movw $lib_message, %ax
-    movw $length, %cx
-    call _echo
+    call _test
     jmp .
 #
-# %ax - string
-# %cx - length
+# %esi - string
+# %ecx - length
 #
+.globl _echo
+.type _echo, @function
 _echo:
-    movw %ax, %bp
-    movw $0x1301, %ax
-    movw $0x0c, %bx
-    movw $0x00, %dx
+    movb $0x0e, %ah
+_do_echo:
+    lodsb
     int $0x10
-
+    loop _do_echo
     ret
 
-lib_message:
-    .ascii "Lib message!"
-lib_message_end:
-    .equ length, lib_message_end - lib_message
+.globl _echo_ln
+.type _echo_ln, @function
+_echo_ln:
+    movb $0x0e, %ah
+    movb $0x0d, %al
+    int $0x10
+    movb $0x0a, %al
+    int $0x10
+    ret
 
-dummy:
-    .space 512-(.-_start), 0
+#
+# %si hex
+# %ax char
+#
+.globl _hex_to_char
+.type _hex_to_char, @function
+_hex_to_char:
+    pushl %esi
+    pushl %ebx
+    andl $0x0f, %esi
+    movl $character_table, %ebx
+    movb (%ebx, %esi), %al
+    popl %ebx
+    popl %esi
+    ret
+
+character_table:
+    .ascii "0123456789abcdef"
+
+# 32-bits
+# %esi byte
+# %edi string
+#
+.globl _long_to_string
+.type _long_to_string, @function
+_long_to_string:
+    pushl %ecx
+    movl $8, %ecx
+_do_long_to_string:
+    roll $4, %esi
+    call _hex_to_char
+    movb %al, (%edi)
+    inc %edi
+    dec %ecx
+    jnz _do_long_to_string
+    popl %ecx
+    ret
 

@@ -20,15 +20,15 @@ ld -Ttext 0x7c00 -o boot boot.o
 objcopy -O binary boot boot.bin
 dd if=boot.bin of=boot.img count=1
 chmod -x boot.img
-#rm -f boot boot.o boot.bin
+rm -f boot boot.o boot.bin
 
 # build lib
-#as -o lib.o lib.s
+as -o lib.o lib.s
 as -o $filename.o $1
-ld -Ttext 0x600 -o $filename $filename.o #lib.o
+ld -Ttext 0x600 -o $filename lib.o $filename.o
 objcopy -O binary $filename $filename.bin
 dd if=$filename.bin of=boot.img count=1 seek=1
-#rm -f lib.o $filename.o $filename $filename.bin
+rm -f lib.o $filename.o $filename $filename.bin
 
 exit 0
 
