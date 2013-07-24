@@ -27,7 +27,7 @@ as -o lib.o lib.s
 as -o $filename.o $1
 ld -Ttext 0x600 -o $filename lib.o $filename.o
 objcopy -O binary $filename $filename.bin
-dd if=$filename.bin of=boot.img count=1 seek=1
+dd if=$filename.bin of=boot.img count=2 seek=1
 rm -f lib.o $filename.o $filename $filename.bin
 
 exit 0

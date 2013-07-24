@@ -15,7 +15,7 @@ _start:
     # read sector.
     #
     movb $0x02, %ah
-    movb $0x01, %al
+    movb $0x02, %al
     movb $0x00, %ch
     movb $0x02, %cl
     movb $0x00, %dh

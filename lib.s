@@ -69,3 +69,85 @@ _do_long_to_string:
     popl %ecx
     ret
 
+# print register value
+# %eax, %ebx, %ecx, %edx
+#
+.globl _print_register_value
+.type _print_register_value, @function
+_print_register_value:
+    pushl %esi
+    pushl %edi
+    pushl %ecx
+
+    # print %eax
+    movl %eax, %esi
+    movl $register_value_address, %edi
+    call _long_to_string
+    movl $register_message_eax, %esi
+    movl $register_message_eax_length, %ecx
+    call _echo
+    movl $register_value_address, %esi
+    movl $register_value_address_length, %ecx
+    call _echo
+    call _echo_ln
+    # print %ebx
+    movl %ebx, %esi
+    movl $register_value_address, %edi
+    call _long_to_string
+    movl $register_message_ebx, %esi
+    movl $register_message_ebx_length, %ecx
+    call _echo
+    movl $register_value_address, %esi
+    movl $register_value_address_length, %ecx
+    call _echo
+    call _echo_ln
+    # print %ecx
+    popl %ecx
+    movl %ecx, %esi
+    movl $register_value_address, %edi
+    call _long_to_string
+    movl $register_message_ecx, %esi
+    movl $register_message_ecx_length, %ecx
+    call _echo
+    movl $register_value_address, %esi
+    movl $register_value_address_length, %ecx
+    call _echo
+    call _echo_ln
+    # print %edx
+    movl %edx, %esi
+    movl $register_value_address, %edi
+    call _long_to_string
+    movl $register_message_edx, %esi
+    movl $register_message_edx_length, %ecx
+    call _echo
+    movl $register_value_address, %esi
+    movl $register_value_address_length, %ecx
+    call _echo
+    call _echo_ln
+
+    popl %edi
+    popl %esi
+    ret
+
+register_message_eax:
+    .ascii "%eax : 0x"
+register_message_eax_end:
+    .equ register_message_eax_length, register_message_eax_end - register_message_eax
+register_message_ebx:
+    .ascii "%ebx : 0x"
+register_message_ebx_end:
+    .equ register_message_ebx_length, register_message_ebx_end - register_message_ebx
+register_message_ecx:
+    .ascii "%ecx : 0x"
+register_message_ecx_end:
+    .equ register_message_ecx_length, register_message_ecx_end - register_message_ecx
+register_message_edx:
+    .ascii "%edx : 0x"
+register_message_edx_end:
+    .equ register_message_edx_length, register_message_edx_end - register_message_edx
+register_value_address:
+    .space 8, 0x00
+register_value_address_end:
+    .equ register_value_address_length, register_value_address_end - register_value_address
+
+
