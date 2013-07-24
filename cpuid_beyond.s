@@ -9,6 +9,7 @@ _test:
     call _echo
     call _echo_ln
     movl $0x0d, %eax
+    movl $0x00, %ecx
     cpuid
     call _print_register_value
 
