@@ -30,5 +30,11 @@ objcopy -O binary $filename $filename.bin
 dd if=$filename.bin of=boot.img count=2 seek=1
 rm -f lib.o $filename.o $filename $filename.bin
 
+as -o int0x80.o int0x80.s
+ld -Ttext 0x800 -o int0x80 -e _int0x80 int0x80.o
+objcopy -O binary int0x80 int0x80.bin
+dd if=int0x80.bin of=boot.img count=1 seek=3
+rm -f int0x80.o int0x80 int0x80.bin
+
 exit 0
 

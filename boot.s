@@ -2,6 +2,7 @@
 .section .text
 .equ BOOT_SEG, 0x7c00
 .equ EXEC_SEG, 0x600
+.equ INT_0X80_HANDLER, 0x800
 
 .globl _start
 _start:
@@ -23,6 +24,20 @@ _start:
     movw $EXEC_SEG, %bx
     int $0x13
     jc no_test
+
+    #
+    # read int 0x80 handler
+    #
+    movb $0x02, %ah
+    movb $0x01, %al
+    movb $0x00, %ch
+    movb $0x04, %cl
+    movb $0x00, %dh
+    movb $0x00, %dl
+    movw $INT_0X80_HANDLER, %bx
+    int $0x13
+    jc no_test
+
     ljmp $0x00, $EXEC_SEG
 
 no_test:
