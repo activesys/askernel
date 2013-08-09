@@ -19,3 +19,6 @@
 # Image files
 *.img
 
+# core dump files
+core.*
+
