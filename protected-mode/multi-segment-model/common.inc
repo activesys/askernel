@@ -12,35 +12,35 @@
 # attr = 0x5098(G=0,D/B=1,L=0,AVL=1,P=1,DPL=00,S=1,TYPE=1000)
 .equ INT_HANDLER_BASE,     0x1000
 .equ INT_HANDLER_LIMIT,    0x0fff
-.equ INT_HANDLER_ATTR,     0x5089
+.equ INT_HANDLER_ATTR,     0x409a
 .equ INT_HANDLER_SELECTOR, 0x08
 
 # main code segment
 # attr = 0x5098(G=0,D/B=1,L=0,AVL=1,P=1,DPL=00,S=1,TYPE=1000)
 .equ CODE_MAIN_BASE,       0x2000
 .equ CODE_MAIN_LIMIT,      0x05ff
-.equ CODE_MAIN_ATTR,       0x5089
+.equ CODE_MAIN_ATTR,       0x409a
 .equ CODE_MAIN_SELECTOR,   0x10
 
 # function code segment
 # attr = 0x5098(G=0,D/B=1,L=0,AVL=1,P=1,DPL=00,S=1,TYPE=1000)
 .equ CODE_FUN_BASE,        0x2600
 .equ CODE_FUN_LIMIT,       0x05ff
-.equ CODE_FUN_ATTR,        0x5089
+.equ CODE_FUN_ATTR,        0x409a
 .equ CODE_FUN_SELECTOR,    0x18
 
 # data segment
 # attr = 0x5090(G=0,D/B=1,L=0,AVL=1,P=1,DPL=00,S=1,TYPE=0000)
 .equ DATA_BASE,            0x3000
 .equ DATA_LIMIT,           0x1ff
-.equ DATA_ATTR,            0x5090
+.equ DATA_ATTR,            0x4090
 .equ DATA_SELECTOR,        0x20
 
 # stack segment
 # attr = 0x5092(G=0,D/B=1,L=0,AVL=1,P=1,DPL=00,S=1,TYPE=0010)
 .equ STACK_BASE,           0x3200
 .equ STACK_LIMIT,          0xffff
-.equ STACK_ATTR,           0x5092
+.equ STACK_ATTR,           0x4092
 .equ STACK_SELECTOR,       0x28
 
 # invalid selector
@@ -107,7 +107,7 @@
 
     movl \offset, %edx
     andl $0xffff0000, %edx
-    orl 0x8e00, %edx
+    orl $0x8e00, %edx
     movl %edx, 4(%edi)
 
     popl %edi

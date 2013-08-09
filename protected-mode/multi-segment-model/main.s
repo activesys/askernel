@@ -6,12 +6,12 @@
 .globl _start
 _start:
     # load data segment and stack segment
-    movw $DATA_SELECTOR, %ax
+    movl $DATA_SELECTOR, %eax
     movw %ax, %ds
     movw %ax, %es
     movw %ax, %fs
     movw %ax, %gs
-    movw $STACK_SELECTOR, %ax
+    movl $STACK_SELECTOR, %eax
     movw %ax, %ss
 
     sti
@@ -23,7 +23,7 @@ _start:
     call _echo
 
     # generate #GP exception
-    movw $INVALID_SELECTOR, %ax
+    movl $INVALID_SELECTOR, %eax
     movw %ax, %gs
 
     # jmp to another code segment

@@ -35,10 +35,10 @@ _start:
     # setup idt
     #
     movl $IDT_BASE, %edi
-    setup_idt 13, $EXCEPTION_GP_OFFSET
-    setup_idt 0x80, $INT_0X80_OFFSET
-    setup_idt 0x90, $INT_0X90_OFFSET
-    setup_idt 0xff, $INT_0XFF_OFFSET
+    setup_idt $13, $EXCEPTION_GP_OFFSET
+    setup_idt $0x80, $INT_0X80_OFFSET
+    setup_idt $0x90, $INT_0X90_OFFSET
+    setup_idt $0xff, $INT_0XFF_OFFSET
 
     # load IDT
     lidt IDT_POINTER
@@ -48,19 +48,23 @@ _start:
     #
     movl $GDT_BASE, %edi
     setup_gdt $NULL_DESCRIPTOR_BASE, $NULL_DESCRIPTOR_LIMIT, $NULL_DESCRIPTOR_ATTR
-    shll $3, %edi
+    addl $8, %edi
     setup_gdt $INT_HANDLER_BASE, $INT_HANDLER_LIMIT, $INT_HANDLER_ATTR
-    shll $3, %edi
+    addl $8, %edi
     setup_gdt $CODE_MAIN_BASE, $CODE_MAIN_LIMIT, $CODE_MAIN_ATTR
-    shll $3, %edi
+    addl $8, %edi
     setup_gdt $CODE_FUN_BASE, $CODE_FUN_LIMIT, $CODE_FUN_ATTR
-    shll $3, %edi
+    addl $8, %edi
     setup_gdt $DATA_BASE, $DATA_LIMIT, $DATA_ATTR
-    shll $3, %edi
+    addl $8, %edi
     setup_gdt $STACK_BASE, $STACK_LIMIT, $STACK_ATTR
 
     # load GDT
     lgdt GDT_POINTER
+
+    # check gdtr and idtr
+    sgdt GDTR_CHECK
+    sidt IDTR_CHECK
 
     # switch to protected-mode
     movl %cr0, %eax
@@ -85,8 +89,14 @@ no_test:
 GDT_POINTER:
     .short 0x30
     .int   0x0800
+GDTR_CHECK:
+    .short 0x00
+    .int   0x00
 IDT_POINTER:
     .short 0x7ff
+    .int   0x00
+IDTR_CHECK:
+    .short 0x00
     .int   0x00
 
 boot_message:
