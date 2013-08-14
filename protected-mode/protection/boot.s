@@ -9,11 +9,11 @@ _start:
     # read sector.
     #
     read_sector $SETUP_SEG, $0x02, $0x04
-    jc no_test
+    jc _read_sector_error
 
     ljmp $0x00, $SETUP_SEG
 
-no_test:
+_read_sector_error:
     #
     # show message.
     #
@@ -26,7 +26,7 @@ no_test:
 .include "echo.inc"
 
 boot_message:
-    .ascii "No test to be execute!"
+    .ascii "Read sector failure!"
 boot_message_end:
     .equ boot_message_length, boot_message_end - boot_message
 

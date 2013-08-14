@@ -1,35 +1,16 @@
-.code16
-.section .text
-
 .include "common.inc"
 
+.code16
+.section .text
 .globl _start
 _start:
     cli
 
-    #
-    # read interrupt handler to handler base address
-    #
-    read_sector $INT_HANDLER_BASE, $0x06, $0x01
-    jc no_test
-
-    #
-    # read main code
-    #
-    read_sector $CODE_MAIN_BASE, $0x07, $0x01
-    jc no_test
-
-    #
-    # read function code
-    #
-    read_sector $CODE_FUN_BASE, $0x08, $0x01
-    jc no_test
-
-    #
-    # read data
-    #
-    read_sector $DATA_BASE, $0x09, $0x01
-    jc no_test
+    # move protect mode code to 0x7000
+    movw $_setup_length, %cx
+    movw $_setup, %si
+    movw $SETUP_BASE, %di
+    rep movsb
 
     #
     # setup idt
@@ -53,18 +34,20 @@ _start:
     addl $8, %edi
     setup_gdt $CODE_MAIN_BASE, $CODE_MAIN_LIMIT, $CODE_MAIN_ATTR
     addl $8, %edi
-    setup_gdt $CODE_FUN_BASE, $CODE_FUN_LIMIT, $CODE_FUN_ATTR
-    addl $8, %edi
     setup_gdt $DATA_BASE, $DATA_LIMIT, $DATA_ATTR
     addl $8, %edi
     setup_gdt $STACK_BASE, $STACK_LIMIT, $STACK_ATTR
+    addl $8, %edi
+    setup_gdt $SETUP_BASE, $SETUP_LIMIT, $SETUP_ATTR
+    addl $8, %edi
+    setup_gdt $INT_STACK_BASE, $INT_STACK_LIMIT, $INT_STACK_ATTR
+    addl $8, %edi
+    setup_gdt $VIDEO_BASE, $VIDEO_LIMIT, $VIDEO_ATTR
+    addl $8, %edi
+    setup_gdt $SUPER_BASE, $SUPER_LIMIT, $SUPER_ATTR
 
     # load GDT
     lgdt GDT_POINTER
-
-    # check gdtr and idtr
-    sgdt GDTR_CHECK
-    sidt IDTR_CHECK
 
     # switch to protected-mode
     movl %cr0, %eax
@@ -72,42 +55,64 @@ _start:
     movl %eax, %cr0
 
     # far jmp
-    ljmp $CODE_MAIN_SELECTOR, $0x00
-
-no_test:
-    #
-    # show message.
-    #
-    movw $boot_message, %si
-    movw $boot_message_length, %cx
-    call _echo
-
-    jmp .
-
-.include "echo.inc"
+    ljmp $SETUP_SELECTOR, $0x00
 
 GDT_POINTER:
-    .short 0x30
+    .short 0x48
     .int   0x0800
-GDTR_CHECK:
-    .short 0x00
-    .int   0x00
 IDT_POINTER:
     .short 0x7ff
     .int   0x00
-IDTR_CHECK:
-    .short 0x00
-    .int   0x00
 
-boot_message:
-    .ascii "No test to be execute!"
-boot_message_end:
-    .equ boot_message_length, boot_message_end - boot_message
-end_msg:
-    .ascii "        THE END"
-end_msg_end:
-    .equ end_msg_length, end_msg_end - end_msg
+.type _setup, @function
+_setup:
+    # copy code and date to appropriate address use super data segment.
+    xorl %eax, %eax
+    movw $SUPER_SELECTOR, %ax
+    movw %ax, %ds
+    movw %ax, %es
+    movw %ax, %fs
+    movw %ax, %gs
+    movw $NULL_SELECTOR, %ax
+    movw %ax, %ss
 
-dummy:
-    .space 2048-(.-_start), 0
+    # copy intrrupt code
+    /*
+    movl $_int, %esi
+    movl $INT_HANDLER_BASE, %edi
+    movl _int_end - _int, %ecx
+    rep movsb
+    */
+
+    # copy main code
+    movl $_main, %esi
+    movl $CODE_MAIN_BASE, %edi
+    movl $_main_end, %ecx
+    subl $_main, %ecx
+    rep movsb
+
+    # initialize interrupt environment
+    xorl %eax, %eax
+    movw $INT_STACK_SELECTOR, %ax
+    movw %ax, %ss
+    movl $INT_STACK_INIT_ESP, %esp
+    pushl %eax
+
+    # initialize protected-mode environment
+    xorl %eax, %eax
+    movw $DATA_SELECTOR, %ax
+    movw %ax, %ds
+    movw $VIDEO_SELECTOR, %ax
+    movw %ax, %es
+    movw $STACK_SELECTOR, %ax
+    movw %ax, %ss
+    movl $STACK_INIT_ESP, %esp
+    movw $NULL_SELECTOR, %ax
+    movw %ax, %gs
+    movw %ax, %ss
+
+    jmp .
+
+_setup_end:
+    .equ _setup_length, _setup_end - _setup
 

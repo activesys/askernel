@@ -1,6 +1,35 @@
+# memory layout
+/*
+|                |
++----------------+ 0x8000000 (128M) code
+|                |
++----------------+ 0x7f00000 data
+|                |
+|                |
++----------------+ 0x100f000 %esp
+|                |
++----------------+ 0x1000000 stack
+|                |
++----------------+ 0x7c00 boot
+|                |
++----------------+ 0x7000 protected-mode setup
+|                |
++----------------+ 0x6000 setup
+|                |
++----------------+ 0x5000 int %esp
+|                |
++----------------+ 0x4000 int stack
+|                |
++----------------+ 0x1000 interrupt
+|                |
++----------------+ 0x800 GDT
+|                |
++----------------+ 0x00 IDT
+*/
+
 # content address.
 .equ BOOT_SEG,  0x7c00
-.equ SETUP_SEG, 0x7000
+.equ SETUP_SEG, 0x6000
 
 # for null descriptor
 .equ NULL_DESCRIPTOR_BASE,  0x00
@@ -9,39 +38,62 @@
 .equ NULL_SELECTOR,         0x00
 
 # interrupt and exception handler
-# attr = 0x5098(G=0,D/B=1,L=0,AVL=1,P=1,DPL=00,S=1,TYPE=1000)
+# attr = 0x409a(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=1010)
 .equ INT_HANDLER_BASE,     0x1000
-.equ INT_HANDLER_LIMIT,    0x0fff
+.equ INT_HANDLER_LIMIT,    0xffff
 .equ INT_HANDLER_ATTR,     0x409a
 .equ INT_HANDLER_SELECTOR, 0x08
 
 # main code segment
-# attr = 0x5098(G=0,D/B=1,L=0,AVL=1,P=1,DPL=00,S=1,TYPE=1000)
-.equ CODE_MAIN_BASE,       0x2000
-.equ CODE_MAIN_LIMIT,      0x05ff
+# attr = 0x409a(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=1010)
+.equ CODE_MAIN_BASE,       0x08000000
+.equ CODE_MAIN_LIMIT,      0xffff
 .equ CODE_MAIN_ATTR,       0x409a
 .equ CODE_MAIN_SELECTOR,   0x10
 
-# function code segment
-# attr = 0x5098(G=0,D/B=1,L=0,AVL=1,P=1,DPL=00,S=1,TYPE=1000)
-.equ CODE_FUN_BASE,        0x2600
-.equ CODE_FUN_LIMIT,       0x05ff
-.equ CODE_FUN_ATTR,        0x409a
-.equ CODE_FUN_SELECTOR,    0x18
-
 # data segment
-# attr = 0x5090(G=0,D/B=1,L=0,AVL=1,P=1,DPL=00,S=1,TYPE=0000)
-.equ DATA_BASE,            0x3000
-.equ DATA_LIMIT,           0x1ff
-.equ DATA_ATTR,            0x4090
-.equ DATA_SELECTOR,        0x20
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+.equ DATA_BASE,            0x07f00000
+.equ DATA_LIMIT,           0xffff
+.equ DATA_ATTR,            0x4092
+.equ DATA_SELECTOR,        0x18
 
 # stack segment
-# attr = 0x5092(G=0,D/B=1,L=0,AVL=1,P=1,DPL=00,S=1,TYPE=0010)
-.equ STACK_BASE,           0x3200
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+.equ STACK_BASE,           0x01000000
 .equ STACK_LIMIT,          0xffff
 .equ STACK_ATTR,           0x4092
-.equ STACK_SELECTOR,       0x28
+.equ STACK_SELECTOR,       0x20
+.equ STACK_INIT_ESP,       0x0100f000
+
+# setup segment
+# attr = 0x409a(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=1010)
+.equ SETUP_BASE,           0x7000
+.equ SETUP_LIMIT,          0xffff
+.equ SETUP_ATTR,           0x4092
+.equ SETUP_SELECTOR,       0x28
+
+# interrupt stack segment
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+.equ INT_STACK_BASE,       0x4000
+.equ INT_STACK_LIMIT,      0xffff
+.equ INT_STACK_ATTR,       0x4092
+.equ INT_STACK_SELECTOR,   0x30
+.equ INT_STACK_INIT_ESP,   0x5000
+
+# video data segment
+# attr = 0x4092(G=0,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+.equ VIDEO_BASE,            0x0b8000
+.equ VIDEO_LIMIT,           0xffff
+.equ VIDEO_ATTR,            0x4092
+.equ VIDEO_SELECTOR,        0x38
+
+# super data segment
+# attr = 0xc092(G=1,D/B=1,L=0,AVL=0,P=1,DPL=00,S=1,TYPE=0010)
+.equ SUPER_BASE,            0x00
+.equ SUPER_LIMIT,           0xfffff
+.equ SUPER_ATTR,            0xc092
+.equ SUPER_SELECTOR,        0x40
 
 # invalid selector
 .equ INVALID_SELECTOR,     0x100
