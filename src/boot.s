@@ -2,7 +2,7 @@
 
 .equ BOOTSEG,   0x07c0
 .equ SYSSEG,    0x1000
-.equ SYSLEN,    17
+.equ SYSLEN,    20
 
 .code16
 .section .text
@@ -45,8 +45,8 @@ _load_ok:
 _set_idt_gdt:
     movw $BOOTSEG, %ax
     movw %ax, %ds
-    lidt _idt_pointer
-    lgdt _gdt_pointer
+    lidt _idt_pointer-_start
+    lgdt _gdt_pointer-_start
 
 # set cr0 move to protected mode
     movw $0x0001, %ax
@@ -67,5 +67,6 @@ _gdt_pointer:
     .int   _gdt
 
 _magic_number:
+    .space 510-(.-_start), 0x00
     .short 0xaa55
 

@@ -8,11 +8,11 @@ dd if=boot.bin of=boot.img count=1
 chmod -x boot.img
 rm -f boot boot.o boot.bin
 
-#as -o int.o int.s
-#ld -Ttext 0x800 -o int -e _int0x80 int.o
-#objcopy -O binary int int.bin
-#dd if=int.bin of=boot.img count=1 seek=1
-#rm -f int.o int int.bin
+as -o head.o head.s
+ld -Ttext 0x00 -o head head.o
+objcopy -O binary head head.bin
+dd if=head.bin of=boot.img count=20 seek=1
+rm -f head.o head head.bin
 
 exit 0
 
