@@ -11,7 +11,7 @@ boot/boot.image:
 	cd boot; make
 
 askernel.image: boot/boot.image
-	$(DD) if=boot/boot.image of=askernel.image count=1
+	$(DD) if=boot/boot.image of=askernel.image count=2
 
 clean:
 	cd boot; make clean
