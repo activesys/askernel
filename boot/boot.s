@@ -25,72 +25,56 @@ _print_copyright:
     call _print_nl
     call _print_nl
 
-# load setup to 0x8000
+# load kernel to 0x8000
 _load_setup:
     movw $0x09, %cx
     movw $_loadding_msg, %bp
     call _print_msg
-    movw $0x08, %cx
-    movw $_setup_msg, %bp
+    movw $0x09, %cx
+    movw $_kernel_msg, %bp
     call _print_msg
     call _print_nl
 
-# read 1 sector, and calculate the size of setup.
-# first byte of setup is the sector count of setup.
-_load_setup_first_sector:
-    xorw %dx, %dx
-    movw $0x0002, %cx
-    movw $SETUP_SEGMENT, %ax
-    movw %ax, %es
-    movw $0x00, %bx
-    movw $0x0201, %ax
-    int $0x13
-    jc _load_setup_failed
 
-_load_setup_remainder_sector:
-    # get sector count of setup
-    movw %es:(%bx), %dx
-    call _print_setup_msg
+# load kernel user int $0x13 extended function
+_load_kernel:
+    movw $0x0000, %ax
+    pushw %ax
+    movw $0x0001, %ax
+    pushw %ax
+    movw $KERNEL_TEMP_SEGMENT, %ax
+    movw %ax, %es
+    xorw %di, %di
+    pushw %es
+    pushw %di
+    movw $0x0080, %cx   # 0x80 * 0x200 = 0x10000bytes
+    pushw %cx
+    movw $0x0010, %ax
+    pushw %ax
+    movw $0x4200, %ax
+    int $0x13
+
+    cli
+_move_kernel:
+    cld
+    xorw %ax, %ax
+    movw %ax, %es
+    movw %ax, %di
+    movw $KERNEL_TEMP_SEGMENT, %ax
+    movw %ax, %ds
+    xorw %si, %si
+    movw $0x8000, %cx
+    rep movsw
+
+_setup_dt:
+    movw $BOOT_SEGMENT, %ax
+    movw %ax, %ds
 
 
 
 # loop forever
 _boot_end:
     jmp  .
-
-_print_setup_msg:
-    pushw %dx
-    pushw %bx
-    pushw %es
-    movw %cs, %ax
-    movw %ax, %es
-    movw $0x03, %cx
-    movw $_to_msg, %bp
-    call _print_msg
-    popw %dx
-    call _print_hex
-    movw $0x01, %cx
-    movw $_colon_msg, %bp
-    call _print_msg
-    popw %dx
-    call _print_hex
-    movw $0x08, %cx
-    movw $_length_msg, %bp
-    call _print_msg
-    popw %dx
-    call _print_hex
-    call _print_nl
-    call _print_nl
-    ret
-
-
-# load setup failed
-_load_setup_failed:
-    movw $0x07, %cx
-    movw $_failed_msg, %bp
-    call _print_msg
-    call _print_nl
-    jmp .
 
 
 # print message
@@ -142,20 +126,12 @@ _good_digit:
 
 
 # message
-_length_msg:
-    .ascii " length "
-_colon_msg:
-    .ascii ":"
-_to_msg:
-    .ascii "to "
 _failed_msg:
     .ascii "failed!"
 _loadding_msg:
     .ascii "Loadding "
-_setup_msg:
-    .ascii "setup..."
 _kernel_msg:
-    .ascii "kernel"
+    .ascii "kernel..."
 _booting_msg:
     .ascii "Booting askernel-0.1 (C) 2014 activesys.wb"
 
