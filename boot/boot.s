@@ -7,7 +7,16 @@
 .section .text
 .global _start
 _start:
-    ljmp $BOOT_SEGMENT, $_go-_start
+    movw $BOOT_SEGMENT, %ax
+    movw %ax, %ds
+    xorw %si, %si
+    movw $INIT_SEGMENT, %ax
+    movw %ax, %es
+    xorw %di, %di
+    movw $0x100, %cx
+    rep movsw
+
+    ljmp $INIT_SEGMENT, $_go-_start
 _go:
     movw %cs, %ax
     movw %ax, %ds
@@ -38,19 +47,13 @@ _load_setup:
 
 # load kernel user int $0x13 extended function
 _load_kernel:
-    movw $0x0000, %ax
-    pushw %ax
-    movw $0x0001, %ax
-    pushw %ax
-    movw $KERNEL_TEMP_SEGMENT, %ax
-    movw %ax, %es
-    xorw %di, %di
-    pushw %es
-    pushw %di
-    movw $0x0080, %cx   # 0x80 * 0x200 = 0x10000bytes
-    pushw %cx
-    movw $0x0010, %ax
-    pushw %ax
+    movw $_int0x13_extended, %si
+    movw $_sector_count, %dx
+    movw $0x80, (%edx)
+    movw $_buffer_segment, %dx
+    movw $KERNEL_TEMP_SEGMENT, (%edx)
+    movw $_buffer_offset, %dx
+    movw $0x00, (%edx)
     movw $0x4200, %ax
     int $0x13
 
@@ -67,9 +70,17 @@ _move_kernel:
     rep movsw
 
 _setup_dt:
-    movw $BOOT_SEGMENT, %ax
+    movw $INIT_SEGMENT, %ax
     movw %ax, %ds
 
+    lgdt _load_gdt
+    lidt _load_idt
+
+    movl %cr0, %eax
+    xorl $0x01, %eax
+    movl %eax, %cr0
+
+    ljmp $0x08, $0x00
 
 
 # loop forever
@@ -124,6 +135,31 @@ _good_digit:
     loop _print_digit
     ret
 
+_gdt:
+    .quad   0x0000000000000000
+    .quad   0x00c09a00000007ff
+    .quad   0x00c09200000007ff
+
+_load_idt:
+    .short  0x0000
+    .long   0x00000000
+
+_load_gdt:
+    .short  0x0800
+    .long   0x90000 + _gdt - _start
+
+# int $0x13 extended
+_int0x13_extended:
+    .byte   0x10
+    .byte   0x00
+_sector_count:
+    .short  0x00
+_buffer_segment:
+    .short  0x00
+_buffer_offset:
+    .short  0x00
+_block_number:
+    .quad   0x0000000000000001
 
 # message
 _failed_msg:
