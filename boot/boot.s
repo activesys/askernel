@@ -76,16 +76,51 @@ _setup_dt:
     lgdt _load_gdt
     lidt _load_idt
 
+_reinit_8259a:
+_master_icw1:
+    movb $0x11, %al
+    outb %al, $0x20
+    jmp _slave_icw1
+_slave_icw1:
+    outb %al, $0xa0
+    jmp _master_icw2
+_master_icw2:
+    movb $0x20, %al
+    outb %al, $0x21
+    jmp _slave_icw2
+_slave_icw2:
+    movb $0x28, %al
+    outb %al, $0xa1
+    jmp _master_icw3
+_master_icw3:
+    movb $0x04, %al
+    outb %al, $0x21
+    jmp _slave_icw3
+_slave_icw3:
+    movb $0x02, %al
+    outb %al, $0xa1
+    jmp _master_icw4
+_master_icw4:
+    movb $0x01, %al
+    outb %al, $0x21
+    jmp _slave_icw4
+_slave_icw4:
+    outb %al, $0xa1
+    jmp _master_ocw1
+_master_ocw1:
+    movb $0xff, %al
+    outb %al, $0x21
+    jmp _slave_ocw1
+_slave_ocw1:
+    outb %al, $0xa1
+    jmp _switch_to_protected
+
+_switch_to_protected:
     movl %cr0, %eax
     xorl $0x01, %eax
     movl %eax, %cr0
 
     ljmp $0x08, $0x00
-
-
-# loop forever
-_boot_end:
-    jmp  .
 
 
 # print message
@@ -174,5 +209,3 @@ _booting_msg:
 _magic_number:
     .space 510-(.-_start), 0x00
     .short 0xaa55
-_test_message:
-    .short 0x12ab
