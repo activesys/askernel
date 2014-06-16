@@ -8,6 +8,7 @@
 .text
 .global _start
 _start:
+_pg_dir:
     movl $0x10, %eax
     movw %ax, %ds
     movw %ax, %es
@@ -101,6 +102,27 @@ _default_int:
 # setup paging
 .balign 4
 _setup_paging:
+    movl $1024*5, %ecx
+    xorl %eax, %eax
+    xorl %edi, %edi
+    cld
+    rep stosl
+    movl $_pg0 + 7, _pg_dir
+    movl $_pg1 + 7, _pg_dir + 4
+    movl $_pg2 + 7, _pg_dir + 8
+    movl $_pg3 + 7, _pg_dir + 12
+    movl $_pg3 + 4092, %edi
+    movl $0xfff007, %eax
+    std
+1:  stosl
+    subl $0x1000, %eax
+    jge 1b
+
+    xorl %eax, %eax
+    movl %eax, %cr3
+    movl %cr0, %eax
+    orl $0x80000000, %eax
+    movl %eax, %cr0
     ret
 
 
