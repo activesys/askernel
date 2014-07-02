@@ -22,3 +22,7 @@
 # core dump files
 core.*
 
+bochsout.txt
+*.image
+*.iso
+*.bin

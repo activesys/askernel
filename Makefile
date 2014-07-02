@@ -2,23 +2,26 @@
 # Makefile for askernel.
 #
 
-DD = dd
+CC = i686-elf-gcc
+AS = i686-elf-as
+CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+ASFLAGS =
+LD = i686-elf-gcc
+LDFLAGS = -ffreestanding -O2 -nostdlib
+
+%o%c:
+	$(CC) $(CFLAGS) -o $@ $<
+
+%o%s:
+	$(AS) $(ASFLAGS) -o $@ $<
 
 all: askernel.image
 
-# Build boot.image
-boot/boot.image:
-	cd boot; make
-boot/head.image:
-	cd boot; make
-
-askernel.image: boot/boot.image
-	$(DD) if=boot/boot.image of=askernel.image count=1
-	$(DD) if=boot/head.image of=askernel.image count=80 seek=1
+askernel.image: boot.o kernel.o linker.ld
+	$(LD) $(LDFLAGS) -T linker.ld -o askernel.image boot.o kernel.o -lgcc
 
 clean:
-	cd boot; make clean
-	rm -f askernel.image
+	rm -f *.o askernel.image
 
 remake:
 	make clean; make
