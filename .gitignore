@@ -23,6 +23,6 @@
 core.*
 
 bochsout.txt
-*.image
+*.img
 *.iso
 *.bin

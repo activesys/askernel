@@ -8,6 +8,10 @@ CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 ASFLAGS =
 LD = i686-elf-gcc
 LDFLAGS = -ffreestanding -O2 -nostdlib
+MKISO = grub-mkrescue
+ISODIR = isodir
+ISOBOOT = $(ISODIR)/boot
+MV = mv
 
 %o%c:
 	$(CC) $(CFLAGS) -o $@ $<
@@ -15,13 +19,21 @@ LDFLAGS = -ffreestanding -O2 -nostdlib
 %o%s:
 	$(AS) $(ASFLAGS) -o $@ $<
 
-all: askernel.image
+askernel.iso: askernel.img
+	$(MV) askernel.img $(ISOBOOT)
+	$(MKISO) -o askernel.iso $(ISODIR)
 
-askernel.image: boot.o kernel.o linker.ld
-	$(LD) $(LDFLAGS) -T linker.ld -o askernel.image boot.o kernel.o -lgcc
+askernel.img: boot.o kernel.o linker.ld
+	$(LD) $(LDFLAGS) -T linker.ld -o askernel.img boot.o kernel.o -lgcc
+
+all: askernel.iso
+
+iso: askernel.iso
+
+img: askernel.img
 
 clean:
-	rm -f *.o askernel.image
+	rm -f *.o *.img *.iso $(ISOBOOT)/*.img
 
 remake:
 	make clean; make
