@@ -20,8 +20,9 @@ stack_top:
 .type _start, @function
 _start:
     movl $stack_top, %esp
-    call kernel_main
+    pushl %ebx              # push mulitboot header pointer into stack.
     cli
+    call kernel_main
     hlt
 .lhang:
     jmp .lhang

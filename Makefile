@@ -23,8 +23,10 @@ askernel.iso: askernel.img
 	$(MV) askernel.img $(ISOBOOT)
 	$(MKISO) -o askernel.iso $(ISODIR)
 
-askernel.img: boot.o kernel.o linker.ld
-	$(LD) $(LDFLAGS) -T linker.ld -o askernel.img boot.o kernel.o -lgcc
+OBJS = boot.o common.o monitor.o kernel.o
+
+askernel.img: $(OBJS) linker.ld
+	$(LD) $(LDFLAGS) -T linker.ld -o askernel.img $(OBJS) -lgcc
 
 all: askernel.iso
 
