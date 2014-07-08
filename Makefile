@@ -4,7 +4,7 @@
 
 CC = i686-elf-gcc
 AS = i686-elf-as
-CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+CFLAGS = -g -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 ASFLAGS =
 LD = i686-elf-gcc
 LDFLAGS = -ffreestanding -O2 -nostdlib

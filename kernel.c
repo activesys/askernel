@@ -20,9 +20,14 @@ extern "C"
 void kernel_main()
 {
     monitor_clear();
-    int i = 0;
-    for (i = 0; i < 20; ++i) {
-        monitor_write("Hello ASKernel\n");
-        monitor_write("Hello World!\n");
-    }
+    monitor_write("Hello ASKernel\n");
+    monitor_write("Hello World!\n");
+    monitor_write_hex(0x01234567);
+    monitor_write("\n");
+    monitor_write_hex(0x89abcdef);
+    monitor_write("\n");
+    monitor_write_dec(0xffffffff);
+    monitor_write("\n");
+    monitor_write_dec(189064);
+    monitor_write("\n");
 }

@@ -1,10 +1,9 @@
 #include "monitor.h"
-#include "common.h"
 
 
 static uint16_t cursor_x = 0;
 static uint16_t cursor_y = 0;
-static uint16_t* video_memory = 0x0b8000;
+static uint16_t* video_memory = (void*)0x0b8000;
 
 enum monitor_color {
     COLOR_BLACK = 0,
@@ -102,4 +101,45 @@ void monitor_write(char* s)
     while (s[i]) {
         monitor_put(s[i++]);
     }
+}
+
+void monitor_write_hex(uint32_t n)
+{
+    char buffer[11] = {'0', 'x', '\0'};
+
+    int i = 0;
+    for (i = 0; i < 8; ++i) {
+        uint8_t nibble = (n >> (28-4*i)) & 0x0f;
+
+        if ((nibble >= 0x00) && (nibble <= 0x09)) {
+            buffer[i+2] = nibble + '0';
+        } else {
+            buffer[i+2] = nibble - 0x0a + 'A';
+        }
+    }
+
+    monitor_write(buffer);
+}
+
+void monitor_write_dec(uint32_t n)
+{
+    char buffer[11] = {'\0'};
+    int i = 0;
+    int j = 0;
+    int k = 0;
+
+    while (n) {
+        uint8_t r = n - n / 10 * 10;
+        n = n / 10;
+        buffer[i++] = r + '0';
+    }
+
+    k = i/2;
+    for (j = 0; j < k; ++j) {
+        char c = buffer[j];
+        buffer[j] = buffer[i-j-1];
+        buffer[i-j-1] = c;
+    }
+
+    monitor_write(buffer);
 }
