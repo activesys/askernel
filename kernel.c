@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "monitor.h"
+#include "descriptor_tables.h"
 
 #if defined(__linux__)
 #error "You are not using a cross-compiler, you will most certainly run into trouble."
@@ -30,4 +31,9 @@ void kernel_main()
     monitor_write("\n");
     monitor_write_dec(189064);
     monitor_write("\n");
+
+    init_descriptor_tables();
+
+    __asm__ __volatile__("int $0x03");
+    __asm__ __volatile__("int $0x04");
 }
