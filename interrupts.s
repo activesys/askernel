@@ -3,8 +3,8 @@
 .type isr\n, @function
 isr\n:
     cli
-    pushb $0x00
-    pushb $\n
+    pushl $0x00
+    pushl $\n
     jmp isr_common_stub
 .endm
 
@@ -13,7 +13,7 @@ isr\n:
 .type isr\n, @function
 isr\n:
     cli
-    pushb $\n
+    pushl $\n
     jmp isr_common_stub
 .endm
 

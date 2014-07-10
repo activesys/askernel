@@ -24,7 +24,7 @@ static void gdt_set_gate(uint8_t num, uint32_t base, uint32_t limit, uint8_t acc
 static void init_gdt()
 {
     gdt_ptr.limit = sizeof(gdt_entry_t) * 5 - 1;
-    gdt_ptr.base = (uint32_t)&gdt_entries;
+    gdt_ptr.base = (uint32_t)gdt_entries;
 
     gdt_set_gate(0, 0, 0, 0, 0);
     gdt_set_gate(1, 0, 0xffffffff, 0x9a, 0xcf);
@@ -32,7 +32,7 @@ static void init_gdt()
     gdt_set_gate(3, 0, 0xffffffff, 0xfa, 0xcf);
     gdt_set_gate(4, 0, 0xffffffff, 0xf2, 0xcf);
 
-    gdt_flush((uint32_t)&gdt_entries);
+    gdt_flush((uint32_t)&gdt_ptr);
 }
 
 static void idt_set_gate(uint8_t num, uint32_t base, uint16_t selector, uint8_t flags)
@@ -48,10 +48,18 @@ static void idt_set_gate(uint8_t num, uint32_t base, uint16_t selector, uint8_t 
 
 static void init_idt()
 {
-    idt_ptr.limit = sizeof(idt_entry_t) * 256 - 1;
-    idt_ptr.base = (uint32_t)&idt_entries;
+    int i = 0;
 
-    memset(&idt_entries, 0x00, sizeof(idt_entry_t) * 256);
+    idt_ptr.limit = sizeof(idt_entry_t) * 256 - 1;
+    idt_ptr.base = (uint32_t)idt_entries;
+
+    for (i = 0; i < 256; ++i) {
+        idt_entries[i].base_low = 0x00;
+        idt_entries[i].selector = 0x00;
+        idt_entries[i].reserved = 0x00;
+        idt_entries[i].flags = 0x00;
+        idt_entries[i].base_high = 0x00;
+    }
 
     idt_set_gate(0, (uint32_t)isr0, 0x08, 0x8e);
     idt_set_gate(1, (uint32_t)isr1, 0x08, 0x8e);
@@ -85,9 +93,12 @@ static void init_idt()
     idt_set_gate(29, (uint32_t)isr29, 0x08, 0x8e);
     idt_set_gate(30, (uint32_t)isr30, 0x08, 0x8e);
     idt_set_gate(31, (uint32_t)isr31, 0x08, 0x8e);
+
+    idt_flush((uint32_t)&idt_ptr);
 }
 
 void init_descriptor_tables()
 {
     init_gdt();
+    init_idt();
 }
