@@ -6,6 +6,7 @@
 #include "common.h"
 #include "monitor.h"
 #include "descriptor_tables.h"
+#include "timer.h"
 
 #if defined(__linux__)
 #error "You are not using a cross-compiler, you will most certainly run into trouble."
@@ -36,4 +37,8 @@ void kernel_main()
 
     __asm__ __volatile__("int $0x03");
     __asm__ __volatile__("int $0x04");
+
+    init_timer(50);
+
+    __asm__ __volatile__("sti");
 }
