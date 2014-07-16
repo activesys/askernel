@@ -10,10 +10,11 @@
 .long FLAGS
 .long CHECKSUM
 
+.global stack_top, stack_bottom 
 .section .bootstrap_stack, "aw", @nobits
 stack_bottom:
-.skip 16384
-stack_top:
+.skip 4096
+stack_top:  
 
 .section .text
 .global _start

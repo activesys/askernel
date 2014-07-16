@@ -24,7 +24,7 @@ askernel.iso: askernel.img
 	$(MKISO) -o askernel.iso $(ISODIR)
 
 OBJS = boot.o common.o monitor.o kernel.o descriptor_tables.o descriptor_tables_flush.o \
-	   interrupts.o isr.o timer.o
+	   interrupts.o isr.o timer.o paging.o kheap.o
 
 askernel.img: $(OBJS) linker.ld
 	$(LD) $(LDFLAGS) -T linker.ld -o askernel.img $(OBJS) -lgcc
