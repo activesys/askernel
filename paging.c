@@ -163,7 +163,9 @@ void page_fault(registers_t regs)
     if (id) {
         monitor_write("id ");
     }
-    monitor_write(") at");
+    monitor_write(") at ");
     monitor_write_hex(faulting_address);
     monitor_write("\n");
+
+    for (;;);
 }
