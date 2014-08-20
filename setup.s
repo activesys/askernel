@@ -80,7 +80,10 @@ _start:
     movw %ax, %fs
     movw %ax, %gs
     movw %ax, %ss
-    movl stack_bottom, %esp
+    movl $stack_bottom, %esp
+
+    # setup paging
+    call setup_paging
 
 _end:
     jmp .
@@ -100,12 +103,12 @@ setup_idt:
 
     leal idt, %edi
     movl $256, %ecx
-setup_idt_repeat:
+.L0:
     movl %eax, (%edi)
     movl %edx, 4(%edi)
     addl $8, %edi
     dec  %ecx
-    jne  setup_idt_repeat
+    jne  .L0
     lidt idt_descriptor
     ret
 
@@ -135,6 +138,36 @@ default_interrupt_handler:
     popl %ecx
     popl %eax
     iret
+
+.align 4
+setup_paging:
+    # empty page directory and 4 page table
+    movl $1024*5, %ecx
+    xorl %eax, %eax
+    xorl %edi, %edi
+    cld
+    rep stosl
+
+    # set page directory entry
+    movl $page_table_0+7, page_dir
+    movl $page_table_1+7, page_dir+4
+    movl $page_table_2+7, page_dir+8
+    movl $page_table_3+7, page_dir+12
+    # set page table entry
+    movl $page_table_3+4092, %edi
+    movl $0xfff007, %eax
+    std
+.L1:
+    stosl
+    subl $0x1000, %eax
+    jge .L1
+    # start paging
+    xorl %eax, %eax
+    movl %eax, %cr3
+    movl %cr0, %eax
+    orl $0x80000000, %eax
+    movl %eax, %cr0
+    ret
 
 # descriptor of GDT and IDT
 .align 4

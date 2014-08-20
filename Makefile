@@ -23,7 +23,7 @@ askernel.iso: askernel.img
 	$(MV) askernel.img $(ISOBOOT)
 	$(MKISO) -o askernel.iso $(ISODIR)
 
-OBJS = boot.o
+OBJS = setup.o
 
 askernel.img: $(OBJS) askernel.lds
 	$(LD) $(LDFLAGS) -T askernel.lds -o askernel.img $(OBJS) -lgcc
