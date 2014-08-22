@@ -49,7 +49,6 @@ stack_bottom:
 ################################
 # GDT and IDT
 #
-.org 0x7000
 .global gdt, idt
 idt:
     .fill 256, 8, 0x00
@@ -64,7 +63,7 @@ gdt:
 ################################
 # Entery point
 #
-.org 0x8000
+.org 0x7000
 .section .text
 .global _start, _end
 .type _start, @function
@@ -84,6 +83,7 @@ _start:
 
     # setup paging
     call setup_paging
+    call main
 
 _end:
     jmp .
