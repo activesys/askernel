@@ -1,5 +1,5 @@
 #
-# Makefile for main.
+# Makefile for mm.
 #
 
 AR = i686-elf-ar
@@ -14,11 +14,11 @@ MV = mv
 %.a:%.o
 	$(AR) $(ARFLAGS) $@ $<
 
-OBJS = main.o
+OBJS = mm.o
 
-main.a: $(OBJS)
+mm.a: $(OBJS)
 
-all: main.a
+all: mm.a
 
 clean:
 	rm -f *.o *.a 

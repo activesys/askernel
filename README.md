@@ -11,8 +11,10 @@ kernel的内存映射结构
 |                |
 |                |
 |                |
++----------------+ <-- 0x400000(4M) (memory buffer end)
 |                |
-+----------------+ <-- 0x200000(2M) (kernel code end, main memory start)
+|                |
++----------------+ <-- 0x100000(1M) (kernel code end, memory buffer start)
 |                |
 +----------------+ <-- 0x7000 _start (kernel code start)
 |                |
